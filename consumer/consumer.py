@@ -5,10 +5,10 @@ def callback(ch, method, properties, body):
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
 channel = connection.channel()
-channel.queue_declare(queue='monitor')
+channel.queue_declare(queue='monitoring')
 
 channel.basic_consume(callback,
-                      queue='monitor',
+                      queue='monitoring',
                       no_ack=False)
 
 print(' [*] Waiting for messages. To exit press CTRL+C')
