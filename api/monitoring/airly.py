@@ -5,11 +5,11 @@ from datetime import datetime
 headers = {
     'apikey': config.AIRLY_TOKEN
 }
-r = requests.get(config.AIRLY_FIND_ALL_STATION_URL, headers=headers)
+r = requests.get(config.AIRLY_FIND_ALL_STATION_URL, headers=headers, timeout=5)
 resonse = r.json()
 
 for station in resonse:
-    r = requests.get(config.AIRLY_GET_STATION_STATUS_URL + str(station['id']), headers=headers)
+    r = requests.get(config.AIRLY_GET_STATION_STATUS_URL + str(station['id']), headers=headers, timeout=5)
 
     station_details = r.json()
     history = station_details['history']

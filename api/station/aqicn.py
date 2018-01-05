@@ -4,7 +4,7 @@ from api import config, producer
 headers = {
     'apikey': config.AIRLY_TOKEN
 }
-r = requests.get(config.AQICN_FIND_ALL_STATION_URL, headers=headers)
+r = requests.get(config.AQICN_FIND_ALL_STATION_URL, headers=headers, timeout=5)
 response = r.json()
 
 if r.status_code == 200:

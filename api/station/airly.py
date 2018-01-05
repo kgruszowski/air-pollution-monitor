@@ -4,7 +4,7 @@ from api import config, producer
 headers = {
     'apikey': config.AIRLY_TOKEN
 }
-r = requests.get(config.AIRLY_FIND_ALL_STATION_URL, headers=headers)
+r = requests.get(config.AIRLY_FIND_ALL_STATION_URL, headers=headers, timeout=5)
 resonse = r.json()
 
 for station in resonse:
