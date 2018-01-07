@@ -1,15 +1,48 @@
-import pika
+import pika, json, psycopg2
+from psycopg2 import IntegrityError 
 
-def callback(ch, method, properties, body):
-    print(" [x] Received %r" % body)
+def callback(channel, method, properties, body):
+    
+    data = json.loads(body)
+    
+    try:
+        connDB = psycopg2.connect("dbname=airpollutionmonitor user=air host=localhost")
+    except:
+        print("Unable to connect the db, please check logs!")
+    
+    curDB = connDB.cursor()
 
-connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
-channel = connection.channel()
-channel.queue_declare(queue='monitoring')
+    if method.routing_key == "station":
+        curDB.execute("SELECT COUNT(*) FROM stations WHERE id = %s AND vendor = %s;", (data["id"],data["vendor"],))
 
-channel.basic_consume(callback,
-                      queue='monitoring',
-                      no_ack=False)
+        if curDB.fetchall()[0][0] == 0:
+            curDB.execute("INSERT INTO stations (vendor, id, stationname, lng, lat, city, street) VALUES (%s, %s, %s, %s, %s, %s, %s)", (data["vendor"], data["id"], data["station_name"], data["lng"], data["lat"], data["city"], data["street"] ))
+            connDB.commit()
+    
+    if method.routing_key == "monitoring":
+        curDB.execute("SELECT COUNT(*) FROM monitoring WHERE id = %s AND vendor = %s AND date = %s;", (data["id"],data["vendor"],data["date"]))
+        if curDB.fetchall()[0][0] == 0:
+            try:
+                curDB.execute("INSERT INTO monitoring (vendor, id, pm2_5, pm10, temp, date) VALUES (%s, %s, %s, %s, %s, %s)", (data["vendor"], data["id"], data["pm2_5"], data["pm10"], data["temperature"], data["date"] ))
+            except IntegrityError:
+                print("!ERROR! Received data about " + data["vendor"] + " station id:" + str(data["id"]) + " haven't been found in stations set, the data is dropped!!!")
+            connDB.commit()
 
-print(' [*] Waiting for messages. To exit press CTRL+C')
-channel.start_consuming()
+    connDB.close()
+    channel.basic_ack(delivery_tag=method.delivery_tag)
+
+def on_open(connection):
+    connection.channel(on_channel_open)
+
+def on_channel_open(channel):
+    channel.basic_consume(callback, queue='station')
+    channel.basic_consume(callback, queue='monitoring')
+
+parameters = pika.URLParameters('amqp://guest:guest@localhost:5672/%2F')
+connection = pika.SelectConnection(parameters=parameters, 
+                                    on_open_callback=on_open)
+
+try:
+    connection.ioloop.start()
+except KeyboardInterrupt:
+    connection.close()
