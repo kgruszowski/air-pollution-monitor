@@ -19,9 +19,10 @@ for station in resonse:
         normalized_measurements = {}
         normalized_measurements['id'] = station['id']
         normalized_measurements['vendor'] = 'AIRLY'
-        normalized_measurements['pm2_5'] = measurements['pm25']
-        normalized_measurements['pm10'] = measurements['pm10']
-        normalized_measurements['temperature'] = measurements['temperature']
+
+        normalized_measurements['pm2_5'] = measurements['pm25'] if 'pm25' in measurements else None
+        normalized_measurements['pm10'] = measurements['pm10'] if 'pm10' in measurements else None
+        normalized_measurements['temperature'] = measurements['temperature'] if 'temperature' in measurements else None
         normalized_measurements['date'] = datetime.strptime(status['fromDateTime'], '%Y-%m-%dT%H:%M:%SZ').strftime("%Y-%m-%d %H:%M:%S")
 
         producer.send('monitoring', normalized_measurements)
