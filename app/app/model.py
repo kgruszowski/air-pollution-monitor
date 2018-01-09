@@ -5,7 +5,7 @@
 #   * Make sure each ForeignKey has `on_delete` set to the desired behavior.
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
-from django.db import models
+from django.db import models, connection
 
 
 class Monitoring(models.Model):
@@ -34,3 +34,22 @@ class Stations(models.Model):
     class Meta:
         managed = False
         db_table = 'stations'
+
+    def dictfetchall(cursor):
+        columns = [col[0] for col in cursor.description]
+        return [
+            dict(zip(columns, row))
+            for row in cursor.fetchall()
+        ]
+
+    def getStationAndStatus(self):
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT s.*, m1.* '
+                           'FROM stations s '
+                           'JOIN monitoring m1 ON s.id = m1.stationid '
+                           'LEFT OUTER JOIN monitoring m2 ON s.id = m2.stationid AND (m1.date < m2.date OR m1.date = m2.date AND m1.id < m2.id) '
+                           'WHERE m2.id IS NULL;')
+            rows = self.dictfetchall(cursor)
+
+        return rows
+

@@ -3,7 +3,7 @@ from .model import Stations, Monitoring
 
 def index(request):
 
-    stations = Stations.objects.all()
+    stations = Stations.getStationAndStatus(Stations)
 
     context = {
         'stations': stations

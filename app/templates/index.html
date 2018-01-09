@@ -50,9 +50,13 @@
             },
             id: {{ station.id }},
             title: '{{ station.stationname }} - {{ station.street }}',
-            info: '<div class="container">'
-            +'<p>PM2.5 {{ station.pm2_5 }}</p>'
-            +'<p>PM10 {{ station.pm10 }}</p>'
+            info: '<div>'
+            +'<p><strong>Dostawca:</strong> {{ station.vendor }}</p>'
+            +'<p><strong>Nazwa stacji:</strong> {{ station.stationname }}</p>'
+            +'<p><strong>Adres:</strong> {{ station.street }}</p>'
+            +'<p><strong>PM2.5:</strong> {{ station.pm2_5|floatformat }}</p>'
+            +'<p><strong>PM10:</strong> {{ station.pm10|floatformat }}</p>'
+            +'<p><strong>Temperatura:</strong> {{ station.temp|floatformat }}°C</p>'
         },
       {% endfor %}
       ]
