@@ -16,14 +16,19 @@ def callback(channel, method, properties, body):
         curDB.execute("SELECT COUNT(*) FROM stations WHERE id = %s AND vendor = %s;", (data["id"],data["vendor"],))
 
         if curDB.fetchall()[0][0] == 0:
-            curDB.execute("INSERT INTO stations (vendor, id, stationname, lng, lat, city, street) VALUES (%s, %s, %s, %s, %s, %s, %s)", (data["vendor"], data["id"], data["station_name"], data["lng"], data["lat"], data["city"], data["street"] ))
+            curDB.execute("INSERT INTO stations (vendor, stationid, stationname, lng, lat, city, street) VALUES (%s, %s, %s, %s, %s, %s, %s)", (data["vendor"], data["id"], data["station_name"], data["lng"], data["lat"], data["city"], data["street"] ))
             connDB.commit()
     
     if method.routing_key == "monitoring":
-        curDB.execute("SELECT COUNT(*) FROM monitoring WHERE id = %s AND vendor = %s AND date = %s;", (data["id"],data["vendor"],data["date"]))
+        curDB.execute("SELECT id FROM stations WHERE stationid = %s AND vendor = %s;", (data["id"],data["vendor"]))
+
+        #this is NOT stationid in API meaning but the system internal stations(id), which identifies particular stations from stations table primary key
+        stationID = curDB.fetchall()[0][0]
+
+        curDB.execute("SELECT COUNT(*) FROM monitoring WHERE stationid = %s AND date = %s;", (stationID, data["date"]))
         if curDB.fetchall()[0][0] == 0:
             try:
-                curDB.execute("INSERT INTO monitoring (vendor, id, pm2_5, pm10, temp, date) VALUES (%s, %s, %s, %s, %s, %s)", (data["vendor"], data["id"], data["pm2_5"], data["pm10"], data["temperature"], data["date"] ))
+                curDB.execute("INSERT INTO monitoring (stationid, pm2_5, pm10, temp, date) VALUES (%s, %s, %s, %s, %s)", (stationID , data["pm2_5"], data["pm10"], data["temperature"], data["date"] ))
             except IntegrityError:
                 print("!ERROR! Received data about " + data["vendor"] + " station id:" + str(data["id"]) + " haven't been found in stations set, the data is dropped!!!")
             connDB.commit()
