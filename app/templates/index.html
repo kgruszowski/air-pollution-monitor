@@ -1,7 +1,65 @@
 {% extends "base.html" %}
 
+{% block inline_css %}
+<style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 700px;
+        width: 100%;
+      }
+</style>
+{% endblock %}
+
 {% block body %}
-    {% for station in stations %}
-        station.name
-    {% endfor %}
+    <div id="map"></div>
+    <script>
+      function initMap() {
+
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 12,
+          center: {lat: 50.050, lng: 19.95}
+        });
+
+        var infoWindow = new google.maps.InfoWindow();
+
+        var markers = locations.map(function(location, i) {
+          var marker = new google.maps.Marker({
+            position: location.position,
+            title: location.title
+          });
+          google.maps.event.addListener(marker, 'click', function(e) {
+            infoWindow.setContent(location.info);
+            infoWindow.open(map, marker)
+          })
+
+          return marker;
+        });
+
+
+        var markerCluster = new MarkerClusterer(map, markers,
+            {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+      }
+
+      var locations = [
+      {% for station in stations %}
+        {
+            position: {
+                lat: {{ station.lat}},
+                lng: {{ station.lng }}
+            },
+            id: {{ station.id }},
+            title: '{{ station.stationname }} - {{ station.street }}',
+            info: '<div class="container">'
+            +'<p>PM2.5 {{ station.pm2_5 }}</p>'
+            +'<p>PM10 {{ station.pm10 }}</p>'
+        },
+      {% endfor %}
+      ]
+    </script>
+    <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js">
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDNWHyEiDeN476Qw_IQwG-pcFlKDkoB_X0&callback=initMap">
+    </script>
 {% endblock %}

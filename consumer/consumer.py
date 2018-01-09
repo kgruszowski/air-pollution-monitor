@@ -2,7 +2,9 @@ import pika, json, psycopg2
 from psycopg2 import IntegrityError 
 
 def callback(channel, method, properties, body):
-    
+
+    print('consume data from queue: '+method.routing_key)
+    body = body.decode("UTF-8")
     data = json.loads(body)
     
     try:

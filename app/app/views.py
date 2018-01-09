@@ -1,12 +1,12 @@
 from django.shortcuts import render
-# from .model import Stations, Monitoring
+from .model import Stations, Monitoring
 
 def index(request):
 
-    # stations = Stations.objects.all()
+    stations = Stations.objects.all()
 
     context = {
-        'stations': {}
+        'stations': stations
     }
 
     return render(request, 'index.html', context)
