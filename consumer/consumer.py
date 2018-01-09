@@ -15,7 +15,7 @@ def callback(channel, method, properties, body):
     curDB = connDB.cursor()
 
     if method.routing_key == "station":
-        curDB.execute("SELECT COUNT(*) FROM stations WHERE id = %s AND vendor = %s;", (data["id"],data["vendor"],))
+        curDB.execute("SELECT COUNT(*) FROM stations WHERE stationid = %s AND vendor = %s;", (data["id"],data["vendor"],))
 
         if curDB.fetchall()[0][0] == 0:
             curDB.execute("INSERT INTO stations (vendor, stationid, stationname, lng, lat, city, street) VALUES (%s, %s, %s, %s, %s, %s, %s)", (data["vendor"], data["id"], data["station_name"], data["lng"], data["lat"], data["city"], data["street"] ))
