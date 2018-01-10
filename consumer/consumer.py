@@ -1,6 +1,9 @@
 import pika, json, psycopg2
 from psycopg2 import IntegrityError 
 
+#creating global variable to hold channel in it
+channel = None
+
 def callback(channel, method, properties, body):
 
     print('consume data from queue: '+method.routing_key)
@@ -41,8 +44,16 @@ def callback(channel, method, properties, body):
 def on_open(connection):
     connection.channel(on_channel_open)
 
-def on_channel_open(channel):
+def on_channel_open(aChannel):
+    global channel
+    channel = aChannel
+    channel.queue_declare(queue='station', callback=on_queue_declared1)
+    channel.queue_declare(queue='monitoring', callback=on_queue_declared2)
+
+def on_queue_declared1(frame):
     channel.basic_consume(callback, queue='station')
+
+def on_queue_declared2(frame):
     channel.basic_consume(callback, queue='monitoring')
 
 parameters = pika.URLParameters('amqp://guest:guest@localhost:5672/%2F')
