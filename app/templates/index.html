@@ -16,6 +16,8 @@
     <script>
       function initMap() {
 
+        var dangerIcon = "https://www.iconsdb.com/icons/preview/soylent-red/warning-xxl.png"
+
         var map = new google.maps.Map(document.getElementById('map'), {
           zoom: 12,
           center: {lat: 50.050, lng: 19.95}
@@ -23,17 +25,40 @@
 
         var infoWindow = new google.maps.InfoWindow();
 
-        var markers = locations.map(function(location, i) {
-          var marker = new google.maps.Marker({
-            position: location.position,
-            title: location.title
-          });
-          google.maps.event.addListener(marker, 'click', function(e) {
-            infoWindow.setContent(location.info);
-            infoWindow.open(map, marker)
-          })
+        var iconOK = 'https://cdn3.iconfinder.com/data/icons/fatcow/32/accept.png'
+        var iconWarning = 'https://cdn3.iconfinder.com/data/icons/fatcow/32x32_0400/error.png'
+        var iconDanger = 'https://cdn2.iconfinder.com/data/icons/circle-icons-1/64/caution-32.png';
 
-          return marker;
+        var markers = locations.map(function(location, i) {
+
+            var icon = '';
+            if (location.pm2_5 > 25  || location.pm10 > 50) {
+                if (location.pm2_5 > 25 && location.pm10 > 50) {
+                    icon = iconDanger;
+                } else {
+                    icon = iconWarning;
+                    if (location.pm2_5 == -1 || location.pm10 == -1) {
+                        icon = iconDanger;
+                    }
+                }
+            } else {
+                icon = iconOK;
+                if (location.pm2_5 == -1 && location.pm10 == -1) {
+                    icon = iconDanger;
+                }
+            }
+
+            var marker = new google.maps.Marker({
+                position: location.position,
+                title: location.title,
+                icon: icon
+            });
+            google.maps.event.addListener(marker, 'click', function(e) {
+                infoWindow.setContent(location.info);
+                infoWindow.open(map, marker)
+            })
+
+            return marker;
         });
 
 
@@ -49,14 +74,18 @@
                 lng: {{ station.lng }}
             },
             id: {{ station.id }},
+            pm2_5: '{{ station.pm2_5|default_if_none:-1 }}',
+            pm10: '{{ station.pm10|default_if_none:-1}}',
             title: '{{ station.stationname }} - {{ station.street }}',
             info: '<div>'
-            +'<p><strong>Dostawca:</strong> {{ station.vendor }}</p>'
-            +'<p><strong>Nazwa stacji:</strong> {{ station.stationname }}</p>'
-            +'<p><strong>Adres:</strong> {{ station.street }}</p>'
+            +'<p><strong>Vendor:</strong> {{ station.vendor }}</p>'
+            +'<p><strong>Station name:</strong> {{ station.stationname }}</p>'
+            +'<p><strong>Address:</strong> {{ station.street }}</p>'
+            +'<p><strong>Latest measurement:</strong> {{ station.date|date:"Y-m-d H:i:s" }}</p>'
             +'<p><strong>PM2.5:</strong> {{ station.pm2_5|floatformat }}</p>'
             +'<p><strong>PM10:</strong> {{ station.pm10|floatformat }}</p>'
-            +'<p><strong>Temperatura:</strong> {{ station.temp|floatformat }}°C</p>'
+            +'<p><strong>Temperature:</strong> {{ station.temp|floatformat }}°C</p>'
+            +'<p><strong>History:</strong> <a href="station/{{ station.id }}">click</a></p>'
         },
       {% endfor %}
       ]

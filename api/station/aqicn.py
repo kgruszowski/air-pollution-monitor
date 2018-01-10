@@ -20,8 +20,8 @@ if r.status_code == 200:
         normalized_station['vendor'] = 'AQICN'
         normalized_station['id'] = station['uid']
         normalized_station['station_name'] = station_details['data']['attributions'][1]['name']
-        normalized_station['lng'] = station['lon']
-        normalized_station['lat'] = station['lat']
+        normalized_station['lng'] = station['lon'] + 0.0004
+        normalized_station['lat'] = station['lat'] + 0.0004
         normalized_station['city'] = "Krakow"
         normalized_station['street'] = station_details['data']['city']['name']
 

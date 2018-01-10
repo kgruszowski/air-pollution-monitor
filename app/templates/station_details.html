@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load define_action %}
+
+{% block body %}
+    <h1>Station: {{ station.stationname }}</h1>
+    <h4>Address: {{ station.street }}</h4>
+
+    <div class="row">
+        <div class="chart-container col-md-6">
+            <canvas id="myChart25"></canvas>
+        </div>
+
+        <div class="chart-container col-md-6">
+            <canvas id="myChart10"></canvas>
+        </div>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <td>Date</td>
+                <td>Temperature</td>
+                <td>PM2.5</td>
+                <td>PM10</td>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for status in monitoring %}
+            {% if status.pm2_5 is None %}
+                {% define "bg-secondary" as pm2class %}
+            {% else %}
+                {% if status.pm2_5 > 25 %}
+                    {% define "bg-danger" as pm2class %}
+                {% else %}
+                    {% define "bg-success" as pm2class %}
+                {% endif %}
+            {% endif %}
+
+            {% if status.pm10 is None %}
+                {% define "bg-secondary" as pm10class %}
+            {% else %}
+                {% if status.pm10 > 50 %}
+                    {% define "bg-danger" as pm10class %}
+                {% else %}
+                    {% define "bg-success" as pm10class %}
+                {% endif %}
+            {% endif %}
+
+            <tr>
+                <td>{{ status.date|date:"Y-m-d H:i:s" }}</td>
+                <td>{{ status.temp|floatformat }}</td>
+                <td class="{{ pm2class }}">{{ status.pm2_5|floatformat }}</td>
+                <td class="{{ pm10class }}">{{ status.pm10|floatformat }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+    var ctx25 = document.getElementById("myChart25").getContext('2d');
+    var ctx10 = document.getElementById("myChart10").getContext('2d');
+
+    pm25Data = [
+        {% for status in monitoring %}
+            {{ status.pm2_5|floatformat }},
+        {% endfor %}
+    ]
+
+    pm25Labels = [
+        {% for status in monitoring %}
+            "{{ status.date|date:"Y-m-d H:i:s" }}",
+        {% endfor %}
+    ]
+
+    var myChart25 = new Chart(ctx25, {
+        type: 'line',
+        data: {
+            labels: pm25Labels,
+            datasets: [{
+                label: "PM2.5",
+                data: pm25Data,
+                backgroundColor: '#ff6666'
+            }]
+        }
+    });
+
+    pm10Data = [
+        {% for status in monitoring %}
+            {{ status.pm10|floatformat }},
+        {% endfor %}
+    ]
+
+    pm10Labels = [
+        {% for status in monitoring %}
+            "{{ status.date|date:"Y-m-d H:i:s" }}",
+        {% endfor %}
+    ]
+
+    var myChart10 = new Chart(ctx10, {
+        type: 'line',
+        data: {
+            labels: pm10Labels,
+            datasets: [{
+                label: "PM10",
+                data: pm10Data,
+                backgroundColor: '#ffc266'
+            }]
+        }
+    });
+    </script>
+{% endblock %}

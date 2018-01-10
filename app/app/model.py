@@ -44,7 +44,7 @@ class Stations(models.Model):
 
     def getStationAndStatus(self):
         with connection.cursor() as cursor:
-            cursor.execute('SELECT s.*, m1.* '
+            cursor.execute('SELECT s.*, m1.pm10, m1.pm2_5, m1.temp, m1.date '
                            'FROM stations s '
                            'JOIN monitoring m1 ON s.id = m1.stationid '
                            'LEFT OUTER JOIN monitoring m2 ON s.id = m2.stationid AND (m1.date < m2.date OR m1.date = m2.date AND m1.id < m2.id) '

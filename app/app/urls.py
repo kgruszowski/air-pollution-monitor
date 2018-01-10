@@ -18,7 +18,8 @@ from django.conf import settings
 from . import views
 
 urlpatterns = [
-    re_path(r'^monitor', views.index, name='index')
+    re_path(r'^monitor$', views.index, name='index'),
+    re_path(r'^station/(\d+)$', views.stationDetails, name='stationDetails')
 ]
 
 if settings.DEBUG:

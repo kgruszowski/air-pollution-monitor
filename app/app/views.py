@@ -10,3 +10,15 @@ def index(request):
     }
 
     return render(request, 'index.html', context)
+
+def stationDetails(request, station_id):
+
+    station = Stations.objects.get(id=station_id)
+    monitoring = station.monitoring_set.all().order_by('date').reverse()
+
+    context = {
+        'station': station,
+        'monitoring': monitoring
+    }
+
+    return render(request, 'station_details.html', context)
