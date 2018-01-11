@@ -1,4 +1,4 @@
-import requests
+import requests, time
 from api import config, producer
 
 headers = {
@@ -23,6 +23,7 @@ for station in resonse:
 
     producer.send('station', normalized_station)
     print("Send info about station {}".format(normalized_station['id']))
+    time.sleep(2)
 
 
 
