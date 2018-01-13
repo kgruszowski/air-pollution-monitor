@@ -86,13 +86,13 @@
     });
 
     pm10Data = [
-        {% for status in monitoring %}
+        {% for status in charts %}
             {{ status.pm10|floatformat }},
         {% endfor %}
     ]
 
     pm10Labels = [
-        {% for status in monitoring %}
+        {% for status in charts %}
             "{{ status.date|date:"Y-m-d H:i:s" }}",
         {% endfor %}
     ]
