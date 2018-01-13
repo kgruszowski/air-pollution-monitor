@@ -16,9 +16,12 @@ def stationDetails(request, station_id):
     station = Stations.objects.get(id=station_id)
     monitoring = station.monitoring_set.all().order_by('date').reverse()
 
+    monitoringCharts = monitoring.reverse()
+
     context = {
         'station': station,
-        'monitoring': monitoring
+        'monitoring': monitoring,
+        'charts': monitoringCharts
     }
 
     return render(request, 'station_details.html', context)

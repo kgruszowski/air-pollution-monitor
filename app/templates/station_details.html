@@ -62,13 +62,13 @@
     var ctx10 = document.getElementById("myChart10").getContext('2d');
 
     pm25Data = [
-        {% for status in monitoring %}
+        {% for status in charts %}
             {{ status.pm2_5|floatformat }},
         {% endfor %}
     ]
 
     pm25Labels = [
-        {% for status in monitoring %}
+        {% for status in charts %}
             "{{ status.date|date:"Y-m-d H:i:s" }}",
         {% endfor %}
     ]
